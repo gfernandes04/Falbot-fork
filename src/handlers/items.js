@@ -6,7 +6,7 @@ const items = [
 			'pt-BR': 'Madeira',
 			'es-ES': 'Madera',
 		},
-		value: 350,
+		value: 310,
 		rarity: 'Common',
 		emoji: '🪵',
 		exploring: true,
