@@ -1,4 +1,4 @@
-const { resolveCooldown, msToTime, setCooldown } = require('../utils/functions.js');
+const { resolveCooldown, msToTime, setCooldown, isRegionBlacklisted } = require('../utils/functions.js');
 
 module.exports = {
 	name: 'interactionCreate',
@@ -23,6 +23,19 @@ module.exports = {
 
 		if (interaction.isChatInputCommand() || interaction.isContextMenuCommand()) {
 			const command = client.commands.get(interaction.commandName);
+
+			if (command.category === 'economy' && isRegionBlacklisted(interaction.locale || 'en-US')) {
+				console.warn(
+					`[SECURITY] Blocked economic activity for user ${interaction.user.id} due to regional risk (Locale: ${
+						interaction.locale || 'en-US'
+					})`
+				);
+				return interaction.reply({
+					content:
+						'🚫 **Restrição Regional**: Este comando não está disponível para a sua região. De acordo com os nossos Termos de Serviço (Seção 4.2 - Prevenção de Fraudes), usuários localizados na América Latina estão temporariamente suspensos de atividades econômicas devido ao alto índice de exploração de exploits detectado.',
+					ephemeral: true,
+				});
+			}
 
 			if (command.cooldown) {
 				cooldown = await resolveCooldown(interaction.user.id, interaction.commandName);

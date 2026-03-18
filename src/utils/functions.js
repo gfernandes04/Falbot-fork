@@ -294,6 +294,18 @@ async function checkIfUserIsPremium(id, client) {
 	return false;
 }
 
+/**
+ *
+ * @param {string} locale
+ * @description Checks if the user's locale is blacklisted
+ * @example isRegionBlacklisted('pt-BR') // true
+ * @returns {boolean}
+ */
+function isRegionBlacklisted(locale) {
+	const unauthorizedLocales = ['pt-BR', 'es-ES', 'es-419'];
+	return unauthorizedLocales.includes(locale);
+}
+
 module.exports = {
 	msToTime,
 	format,
@@ -306,4 +318,5 @@ module.exports = {
 	useItem,
 	resolveCooldown,
 	checkIfUserIsPremium,
+	isRegionBlacklisted,
 };
