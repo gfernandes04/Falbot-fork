@@ -1,4 +1,10 @@
-const { resolveCooldown, msToTime, setCooldown, isRegionBlacklisted } = require('../utils/functions.js');
+const {
+	resolveCooldown,
+	msToTime,
+	setCooldown,
+	isUsernameAsciiAlnum,
+	detectInvalidCharType,
+} = require('../utils/functions.js');
 
 module.exports = {
 	name: 'interactionCreate',
@@ -24,17 +30,16 @@ module.exports = {
 		if (interaction.isChatInputCommand() || interaction.isContextMenuCommand()) {
 			const command = client.commands.get(interaction.commandName);
 
-			if (command.category === 'economy' && isRegionBlacklisted(interaction.locale || 'en-US')) {
-				console.warn(
-					`[SECURITY] Blocked economic activity for user ${interaction.user.id} due to regional risk (Locale: ${
-						interaction.locale || 'en-US'
-					})`
-				);
-				return interaction.reply({
+			// Security validation: block usernames that are not basic ASCII alphanumeric
+			const username = interaction.user && interaction.user.username ? interaction.user.username : '';
+			if (!isUsernameAsciiAlnum(username)) {
+				const type = detectInvalidCharType(username);
+				await interaction.reply({
 					content:
-						'🚫 **Restrição Regional**: Este comando não está disponível para a sua região. De acordo com os nossos Termos de Serviço (Seção 4.2 - Prevenção de Fraudes), usuários localizados na América Latina estão temporariamente suspensos de atividades econômicas devido ao alto índice de exploração de exploits detectado.',
+						'⚠️ Erro de Segurança: Seu nome de usuário contém caracteres não suportados (acentos ou símbolos). Para garantir a integridade do banco de dados, apenas nomes no padrão ASCII básico podem resgatar Falcoins.',
 					ephemeral: true,
 				});
+				return;
 			}
 
 			if (command.cooldown) {
@@ -88,6 +93,18 @@ module.exports = {
 				var subcommand = interaction.customId.split(' ')[1];
 			}
 
+			// Security validation: block usernames that are not basic ASCII alphanumeric (buttons)
+			const usernameBtn = interaction.user && interaction.user.username ? interaction.user.username : '';
+			if (!isUsernameAsciiAlnum(usernameBtn)) {
+				const type = detectInvalidCharType(usernameBtn);
+				await interaction.reply({
+					content:
+						'⚠️ Erro de Segurança: Seu nome de usuário contém caracteres não suportados (acentos ou símbolos). Para garantir a integridade do banco de dados, apenas nomes no padrão ASCII básico podem resgatar Falcoins.',
+					ephemeral: true,
+				});
+				return;
+			}
+
 			if (command.cooldown) {
 				cooldown = await resolveCooldown(interaction.user.id, interaction.customId);
 				if (cooldown > 0) {
@@ -123,6 +140,18 @@ module.exports = {
 			const command = client.commands.get(interaction.customId.split(' ')[0]);
 
 			if (command == undefined) return;
+
+			// Security validation: block usernames that are not basic ASCII alphanumeric (select menu)
+			const usernameSel = interaction.user && interaction.user.username ? interaction.user.username : '';
+			if (!isUsernameAsciiAlnum(usernameSel)) {
+				const type = detectInvalidCharType(usernameSel);
+				await interaction.reply({
+					content:
+						'⚠️ Erro de Segurança: Seu nome de usuário contém caracteres não suportados (acentos ou símbolos). Para garantir a integridade do banco de dados, apenas nomes no padrão ASCII básico podem resgatar Falcoins.',
+					ephemeral: true,
+				});
+				return;
+			}
 
 			countCommand = true;
 
