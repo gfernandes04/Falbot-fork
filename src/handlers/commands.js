@@ -1,5 +1,6 @@
 async function loadCommands(instance, client) {
 	const { loadFiles } = require('../utils/fileLoader');
+	const path = require('path');
 
 	await client.commands.clear();
 
@@ -10,6 +11,9 @@ async function loadCommands(instance, client) {
 
 	Files.forEach((file) => {
 		const command = require(file);
+		const category = path.basename(path.dirname(file));
+		command.category = category;
+
 		client.commands.set(command.data.name, command);
 
 		if (command.developer) {
@@ -23,7 +27,7 @@ async function loadCommands(instance, client) {
 
 	client.application.commands.set(commandsArray);
 
-	for (guild of instance.config.testGuilds) {
+	for (const guild of instance.config.testGuilds) {
 		client.application.commands.set(commandsGuild, guild);
 	}
 }
